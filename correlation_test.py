@@ -27,25 +27,26 @@ y = vR[(fabs(z)<1e-4)&(vz>0)]
 a.plot(x,y,'s', label='Surface of Section')
 a.legend(loc='upper right')
 
-distances=np.zeros((x.size,x.size)) 
+distances=np.zeros((x.size,x.size))  
 
-for i in range(x.size): distances[i]=dist2(x,y,i)
-
-hyper = np.linspace(0,int(np.amax(distances))+1,x.size)
-
-count=np.zeros(x.size)
-
-for j in range (x.size):
-    for i in range (x.size):
-        for k in range (x.size):
-            if distances[i][k] < hyper[j]:
-                count[j] += (1.0/float(len(x)**2))
-
-b.set_yscale('log')
-b.set_xscale('log')
-b.plot(hyper, count, 's', label='C(r) in SoS')
-b.legend(loc='upper left')
-
-
-plt.show()
-plt.close()
+distances=[dist2(x,y,i) for i in range(x.size)] 
+ 
+hyper = np.linspace(0,int(np.amax(distances))+1,x.size) 
+  
+count=np.zeros(x.size) 
+  
+for j in range (x.size): 
+    for i in range (x.size): 
+         for k in range (x.size): 
+             if distances[i][k] < hyper[j]: 
+                 count[j] += (1.0/float(len(x)**2)) 
+  
+b.set_yscale('log') 
+b.set_xscale('log') 
+b.plot(hyper, count, 's', label='C(r) in SoS') 
+b.plot(hyper,hyper) 
+b.legend(loc='upper left') 
+  
+ 
+plt.show() 
+plt.close()   
