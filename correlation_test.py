@@ -52,8 +52,12 @@ def min_chi_square(_x, _y):
         Y=_y[i:l+i]
         param[i]=get_param(X,Y)
         chi_square[i]=sum(Y-param[i][0]*X -param[i][1])**2 #nope
-    plt.plot(chi_square)
+    plt.figure()
+    plt.plot(chi_square,'+')
+    plt.xlabel('starting point')
+    plt.ylabel('chi square')
     plt.show()
+    plt.close()
     return param
 
 
@@ -96,8 +100,7 @@ b.set_xlabel('r', **fnt)
 b.set_ylabel('C(r)', **fnt)
 
 b.plot(rr,cumulative,'s', label='Correlation Integral')
-b.plot(rr, (10**param[1])*(rr**param[0]), label='Linear regression')
+b.plot(rr, (10**param[500][1])*(rr**param[500][0]), label='Linear regression')
 b.legend(loc='upper left')
 
 plt.show()
-plt.close()
