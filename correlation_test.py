@@ -17,13 +17,13 @@ def dist2( _R,_vR, _i,_z=np.zeros(n_data), _phi=np.zeros(n_data),  _vz=np.zeros(
     w=(sqrt((_R-_R[_i])**2+(_z-_z[_i])**2+(_phi-_phi[_i])**2+(_vR-_vR[_i])**2+(_vz-_vz[_i])**2+(_vphi-_vphi[_i])**2))
     return w
 
-def min_chi_square(_x,_y):
+def get_param(_x,_y):
     N=len(_x)
     #M=number of parameters
     sigma=np.zeros(N)
 
-    '''for i in range(N):
-    sigma[i]=1 	in generale (y_i-y(x_i))**/(N-M)'''
+    #for i in range(N):
+    #sigma[i]=1 	in generale (y_i-y(x_i))**/(N-M)
 
     sigma=np.ones(N)
 
@@ -41,7 +41,20 @@ def min_chi_square(_x,_y):
     print("normalization :", q)
     return np.array([m,q])
 
-#superficie di sezione
+def min_chi_square(_x, _y):
+    L=len(_x)
+    l=10
+    step = L - l
+    param=np.zeros((step,2))
+    chi_square=np.zeros(step)
+    for i in range(step):
+        X=_x[i:l+i]
+        Y=_y[i:l+i]
+        param[i]=get_param(X,Y)
+        chi_square[i]=sum(Y-param[i][0]*X -param[i][1])**2 #nope
+    plt.plot(chi_square)
+    plt.show()
+    return param
 
 
 distances=np.zeros((n_data,n_data)) 
@@ -50,7 +63,7 @@ for i in range(n_data):
     distances[i]= dist2(R,vR,i)
 
 distances = distances.reshape(n_data*n_data)
-grid = np.logspace(-3, np.log10(np.amax(distances)), 200)
+grid = np.logspace(-3, np.log10(np.amax(distances)), 2000)
 results = np.histogram(distances, bins=grid)
 
 rr = (results[1][1:] + results[1][:-1])/2.
@@ -60,7 +73,7 @@ cumulative[0] = results[0][0]
 for i in range(1,len(rr),1):
     cumulative[i] = cumulative[i-1]+results[0][i]
 
-param=min_chi_square(log10(rr[:130]),log10(cumulative[:130])) #point 130 should exclude final plateu
+param=min_chi_square(log10(rr[100:1800]),log10(cumulative[100:1800]))  #point 130 should exclude final plateu
 
 
 fancylayout()
@@ -86,5 +99,5 @@ b.plot(rr,cumulative,'s', label='Correlation Integral')
 b.plot(rr, (10**param[1])*(rr**param[0]), label='Linear regression')
 b.legend(loc='upper left')
 
-plt.show() #pirla se non lo metti non mostra svegliati
+plt.show()
 plt.close()
