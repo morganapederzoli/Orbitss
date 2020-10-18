@@ -11,7 +11,7 @@ R, z, phi, vR, vz, vphi = data[:,0], data[:,1], data[:,2], data[:,3], data[:,4],
 
 n_data=R.size
 
-#funzioni da definire
+#funzioni
 
 def dist2( _R,_vR, _i,_z=np.zeros(n_data), _phi=np.zeros(n_data),  _vz=np.zeros(n_data), _vphi=np.zeros(n_data)): 
     w=(sqrt((_R-_R[_i])**2+(_z-_z[_i])**2+(_phi-_phi[_i])**2+(_vR-_vR[_i])**2+(_vz-_vz[_i])**2+(_vphi-_vphi[_i])**2))
@@ -51,7 +51,7 @@ def min_chi_square(_x, _y):
         X=_x[i:l+i]
         Y=_y[i:l+i]
         param[i]=get_param(X,Y)
-        chi_square[i]=sum(Y-param[i][0]*X -param[i][1])**2 #nope
+        chi_square[i]=sum(Y-param[i][0]*X -param[i][1])**2 #doesn't actually work
     plt.figure()
     plt.plot(chi_square,'+')
     plt.xlabel('starting point')
@@ -60,15 +60,20 @@ def min_chi_square(_x, _y):
     plt.close()
     return param
 
+#matrice distanze
 
 distances=np.zeros((n_data,n_data)) 
 
 for i in range(n_data):
     distances[i]= dist2(R,vR,i)
 
+#istogramma occorrenze
+
 distances = distances.reshape(n_data*n_data)
 grid = np.logspace(-3, np.log10(np.amax(distances)), 2000)
 results = np.histogram(distances, bins=grid)
+
+#istogramma cumulativo
 
 rr = (results[1][1:] + results[1][:-1])/2.
 cumulative = np.zeros(len(rr))
@@ -77,8 +82,11 @@ cumulative[0] = results[0][0]
 for i in range(1,len(rr),1):
     cumulative[i] = cumulative[i-1]+results[0][i]
 
-param=min_chi_square(log10(rr[100:1800]),log10(cumulative[100:1800]))  #point 130 should exclude final plateu
+#fitt
 
+param=min_chi_square(log10(rr[100:1800]),log10(cumulative[100:1800])) 
+
+#plottingggg
 
 fancylayout()
 
@@ -100,7 +108,7 @@ b.set_xlabel('r', **fnt)
 b.set_ylabel('C(r)', **fnt)
 
 b.plot(rr,cumulative,'s', label='Correlation Integral')
-b.plot(rr, (10**param[500][1])*(rr**param[500][0]), label='Linear regression')
+b.plot(rr, (10**param[500][1])*(rr**param[500][0]), label='Linear regression') #500 scelto ad occhio perchè il chi ancora non funziona
 b.legend(loc='upper left')
 
 plt.show()
