@@ -37,28 +37,36 @@ def get_param(_x,_y):
     q=(S_xx*S_y - S_x*S_xy)/delta
     m=(S*S_xy - S_x*S_y)/delta
 
-    print("coeff ang :", m)
-    print("normalization :", q)
     return np.array([m,q])
 
 def min_chi_square(_x, _y):
     L=len(_x)
-    l=10
+    l=500
     step = L - l
     param=np.zeros((step,2))
     chi_square=np.zeros(step)
+
     for i in range(step):
         X=_x[i:l+i]
         Y=_y[i:l+i]
         param[i]=get_param(X,Y)
-        chi_square[i]=sum((Y-param[i][0]*X -param[i][1])**2) #doesn't actually work
+        chi_square[i]=sum((Y-param[i][0]*X -param[i][1])**2)
+
+    index_of_minimum = np.where(chi_square == np.amin(chi_square))
+
+    parameters=np.ravel(param[index_of_minimum])
+
+    print("coeff ang :", parameters[0])
+    print("normalization :", parameters[1])
+
     plt.figure()
-    plt.plot(chi_square,'+')
+    plt.plot(rr[:step],chi_square,'+')
     plt.xlabel('starting point')
     plt.ylabel('chi square')
     plt.show()
     plt.close()
-    return param
+
+    return parameters
 
 #matrice distanze
 
@@ -84,7 +92,7 @@ for i in range(1,len(rr),1):
 
 #fitt
 
-param=min_chi_square(log10(rr[100:1800]),log10(cumulative[100:1800])) 
+param=min_chi_square(log10(rr),log10(cumulative)) 
 
 #plottingggg
 
@@ -96,10 +104,9 @@ fnt = {'fontsize':16}
 
 plt.rc('text', usetex=True)
 
-
 a.set_xlabel('R', **fnt)
 a.set_ylabel('vR', **fnt)
-a.plot(R,vR,'s', label='Surface of Section')
+a.plot(R,vR,'+', label='Surface of Section')
 a.legend(loc='upper right')
 
 b.set_xscale('log')
@@ -107,8 +114,8 @@ b.set_yscale('log')
 b.set_xlabel('r', **fnt)
 b.set_ylabel('C(r)', **fnt)
 
-b.plot(rr,cumulative,'s', label='Correlation Integral')
-b.plot(rr, (10**param[500][1])*(rr**param[500][0]), label='Linear regression') #500 scelto ad occhio perchè il chi ancora non funziona
+b.plot(rr,cumulative,'+', label='Correlation Integral')
+b.plot(rr, (10**param[1])*(rr**param[0]), label='Linear regression') #500 scelto ad occhio perchè il chi ancora non funziona
 b.legend(loc='upper left')
 
 plt.show()
