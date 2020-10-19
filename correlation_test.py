@@ -51,7 +51,7 @@ def min_chi_square(_x, _y):
         X=_x[i:l+i]
         Y=_y[i:l+i]
         param[i]=get_param(X,Y)
-        chi_square[i]=sum(Y-param[i][0]*X -param[i][1])**2 #doesn't actually work
+        chi_square[i]=sum((Y-param[i][0]*X -param[i][1])**2) #doesn't actually work
     plt.figure()
     plt.plot(chi_square,'+')
     plt.xlabel('starting point')
