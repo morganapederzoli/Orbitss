@@ -6,8 +6,10 @@ from fancyplot import *
 
 #presa dati
 
-data = genfromtxt('ComplexPlummer0_E_-0.050000_Lz_0.001000.txt', delimiter='	', skip_header=1, usecols=(1,2,3,4,5,6))
+data = genfromtxt('ComplexPlummer2_E_-0.050000_Lz_0.001000.txt', delimiter='	', skip_header=1, usecols=(1,2,3,4,5,6))
 R, z, phi, vR, vz, vphi = data[:,0], data[:,1], data[:,2], data[:,3], data[:,4], data[:,5]
+
+#input('file name? ')
 
 n_data=R.size
 
@@ -35,38 +37,50 @@ def get_param(_x,_y):
     delta=S*S_xx - S_x**2
 
     q=(S_xx*S_y - S_x*S_xy)/delta
-    m=(S*S_xy - S_x*S_y)/delta
+    eq=S_xx/delta
 
-    return np.array([m,q])
+    m=(S*S_xy - S_x*S_y)/delta
+    em=S/delta
+
+    return np.array([m,q]), np.array([em,eq])
 
 def min_chi_square(_x, _y):
     L=len(_x)
     l=500
     step = L - l
     param=np.zeros((step,2))
+    errparam=np.zeros((step,2))
     chi_square=np.zeros(step)
 
     for i in range(step):
         X=_x[i:l+i]
         Y=_y[i:l+i]
-        param[i]=get_param(X,Y)
+        param[i],errparam[i]=get_param(X,Y)
         chi_square[i]=sum((Y-param[i][0]*X -param[i][1])**2)
 
-    index_of_minimum = np.where(chi_square == np.amin(chi_square))
+    index_abs_minimum = np.argmin(chi_square)
 
-    parameters=np.ravel(param[index_of_minimum])
+    index_first_minimum=0
+    while chi_square[index_first_minimum]>chi_square[index_first_minimum+1]:
+        index_first_minimum+=1
 
-    print("coeff ang :", parameters[0])
-    print("normalization :", parameters[1])
+    parameters=np.ravel(param[index_abs_minimum])
+    bestparameters=np.ravel(param[index_first_minimum])
+    errbestparameters=np.ravel(errparam[index_first_minimum])
 
-    plt.figure()
-    plt.plot(rr[:step],chi_square,'+')
-    plt.xlabel('starting point')
-    plt.ylabel('chi square')
+    print("coeff ang :", bestparameters[0], '+/-', errbestparameters[0])
+    print("normalization :", bestparameters[1], '+/-', errbestparameters[1])
+
+    f, (a,b)=plt.subplots(2,1)
+    a.plot(_x[:step], param[:,0])
+    b.plot(_x[index_first_minimum], chi_square[index_first_minimum], marker='s', ms=2,lw=0)
+    b.plot(_x[:step],chi_square,'.', ms=0.5)
+    b.set_xlabel('starting point')
+    b.set_ylabel('chi square')
     plt.show()
     plt.close()
 
-    return parameters
+    return parameters, bestparameters, errbestparameters
 
 #matrice distanze
 
@@ -92,7 +106,7 @@ for i in range(1,len(rr),1):
 
 #fitt
 
-param=min_chi_square(log10(rr),log10(cumulative)) 
+param, bestparam, errbestparam=min_chi_square(log10(rr),log10(cumulative))
 
 #plottingggg
 
@@ -115,7 +129,7 @@ b.set_xlabel('r', **fnt)
 b.set_ylabel('C(r)', **fnt)
 
 b.plot(rr,cumulative,'+', label='Correlation Integral')
-b.plot(rr, (10**param[1])*(rr**param[0]), label='Linear regression') #500 scelto ad occhio perchè il chi ancora non funziona
+b.plot(rr, (10**bestparam[1])*(rr**bestparam[0]), label='Linear regression')
 b.legend(loc='upper left')
 
 plt.show()
