@@ -6,12 +6,12 @@ from fancyplot import *
 
 #presa dati
 
-data = genfromtxt('ComplexPlummer2_E_-0.050000_Lz_0.001000.txt', delimiter='	', skip_header=1, usecols=(1,2,3,4,5,6))
+data = genfromtxt('ComplexPlummer0_E_-0.050000_Lz_0.001000.txt', delimiter='	', skip_header=1, usecols=(1,2,3,4,5,6))
 R, z, phi, vR, vz, vphi = data[:,0], data[:,1], data[:,2], data[:,3], data[:,4], data[:,5]
 
-#input('file name? ')
-
 n_data=R.size
+
+#input('file name? ')
 
 #funzioni
 
@@ -92,7 +92,7 @@ for i in range(n_data):
 #istogramma occorrenze
 
 distances = distances.reshape(n_data*n_data)
-grid = np.logspace(-3, np.log10(np.amax(distances)), 2000)
+grid=np.logspace(-6, np.log10(np.amax(distances)),int(n_data/2))
 results = np.histogram(distances, bins=grid)
 
 #istogramma cumulativo
@@ -104,9 +104,13 @@ cumulative[0] = results[0][0]
 for i in range(1,len(rr),1):
     cumulative[i] = cumulative[i-1]+results[0][i]
 
+cumulative = cumulative/n_data**2
+
+s=cumulative[np.where(cumulative>0.0005)]
+r=rr[np.where(cumulative>0.0012)]
 #fitt
 
-param, bestparam, errbestparam=min_chi_square(log10(rr),log10(cumulative))
+param, bestparam, errbestparam=min_chi_square(log10(r),log10(s))
 
 #plottingggg
 
@@ -131,5 +135,13 @@ b.set_ylabel('C(r)', **fnt)
 b.plot(rr,cumulative,'+', label='Correlation Integral')
 b.plot(rr, (10**bestparam[1])*(rr**bestparam[0]), label='Linear regression')
 b.legend(loc='upper left')
+
+'''plt.xscale('log')
+plt.yscale('log')
+plt.xlabel('r', **fnt)
+plt.ylabel('C(r)', **fnt)
+plt.plot(rr,cumulative,'+', label='Correlation Integral')
+plt.plot(rr, (10**bestparam[1])*(rr**bestparam[0]), label='Linear regression')
+plt.legend(loc='upper left')'''
 
 plt.show()
